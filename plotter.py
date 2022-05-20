@@ -1,6 +1,5 @@
 from PyQt5 import QtCore, QtGui, QtWidgets
 import numpy as np
-
 import matplotlib
 matplotlib.use('Qt5Agg')
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg
@@ -37,8 +36,8 @@ class Ui_MainWindow(object):
             return False
         return True
     
-    def isValidFunction(self):
-        function = self.function.text().strip()
+    def isValidFunction(self,FUNCTION):
+        function = FUNCTION.strip()
         prev = '+'
         if function == "":
             self.showErrorMessage("please input the function you want to plot")
@@ -89,9 +88,15 @@ class Ui_MainWindow(object):
             self.min_x.setFocus()
             return False
         return True
+    def isAllNumeric(self,FUNCTION):
+        function = FUNCTION.strip()
+        for character in function:
+            if character == 'x' or character == 'X':
+                return False
+        return True
 
     def clicked(self):
-        if not self.isValidFunction():
+        if not self.isValidFunction(self.function.text()):
             return
         function = self.function.text().replace("^","**")
         if not self.check_x_values():
@@ -99,7 +104,11 @@ class Ui_MainWindow(object):
         xlist = np.linspace(int(self.min_x.text()),int(self.max_x.text()),num=1000)
         ylist =[]
         try:
-            ylist = eval(function, {'x': xlist})
+            if self.isAllNumeric(self.function.text()):
+                value = eval(function)
+                ylist = [value for i in range(1000)] 
+            else:
+                ylist = eval(function, {'x': xlist})
         except:
             self.showErrorMessage("There is a syntax error in the entered function")
             self.function.setFocus()
